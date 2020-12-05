@@ -8,7 +8,25 @@ export class UsersResolver {
     constructor(private readonly usersService: UsersService) {}
 
     @Mutation(returns => CreateAccountOutput)
-    createAccount(@Args("input") createAccountDto: CreateAccountDto) {
-
+    async createAccount(
+        @Args("input") createAccountDto: CreateAccountDto,
+    ): Promise<CreateAccountOutput> {
+        try {
+            const error = await this.usersService.createAccount(createAccountDto);
+            if (error) {
+                return {
+                    ok: false,
+                    error,
+                };
+            }
+            return {
+                ok: true,
+            };
+        } catch (error) {
+            return {
+                ok: false,
+                error,
+            };
+        }
     }
 }
