@@ -12,15 +12,10 @@ export class UsersResolver {
         @Args("input") createAccountDto: CreateAccountDto,
     ): Promise<CreateAccountOutput> {
         try {
-            const error = await this.usersService.createAccount(createAccountDto);
-            if (error) {
-                return {
-                    ok: false,
-                    error,
-                };
-            }
+            const { ok, error } = await this.usersService.createAccount(createAccountDto);
             return {
-                ok: true,
+                ok,
+                error,
             };
         } catch (error) {
             return {
