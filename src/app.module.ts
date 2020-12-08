@@ -8,6 +8,7 @@ import { join } from "path";
 import { UsersModule } from "./users/users.module";
 import { CommonModule } from "./common/common.module";
 import { User } from "./users/entities/user.entity";
+import { JwtModule } from "./jwt/jwt.module";
 
 @Module({
     imports: [
@@ -37,6 +38,9 @@ import { User } from "./users/entities/user.entity";
             synchronize: process.env.NODE_ENV !== "production",
             logging: true,
             entities: [User],
+        }),
+        JwtModule.forRoot({
+            privateKey:  process.env.TOKEN_SECRET,
         }),
         UsersModule,
         CommonModule,
