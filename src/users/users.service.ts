@@ -52,7 +52,7 @@ export class UsersService {
 
             return {
                 ok: true,
-                token: this.jwtService.sign({ id: user.id }),
+                token: this.jwtService.sign(user.id),
             };
         } catch (error) {
             return {
@@ -60,5 +60,9 @@ export class UsersService {
                 error,
             };
         }
+    }
+
+    async findById(id: number): Promise<User> {
+        return await this.users.findOne(id);
     }
 }
