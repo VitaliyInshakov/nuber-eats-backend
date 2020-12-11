@@ -8,9 +8,9 @@ import { LoginDto, LoginOutput } from "./dto/login.dto";
 export class UsersResolver {
     constructor(private readonly usersService: UsersService) {}
 
-    @Query(returns => Boolean)
-    hi() {
-        return true;
+    @Query(returns => User)
+    me() {
+
     }
 
     @Mutation(returns => CreateAccountOutput)
