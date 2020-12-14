@@ -1,20 +1,19 @@
-import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { UseGuards } from "@nestjs/common";
 import { User } from "./entities/user.entity";
 import { UsersService } from "./users.service";
 import { CreateAccountDto, CreateAccountOutput } from "./dto/create-account.dto";
 import { LoginDto, LoginOutput } from "./dto/login.dto";
+import { AuthGuard } from "../auth/auth.guard";
 
 @Resolver(of => User)
 export class UsersResolver {
     constructor(private readonly usersService: UsersService) {}
 
     @Query(returns => User)
-    me(@Context() context) {
-        if (!context.user) {
-            return;
-        } else {
-            return context.user;
-        }
+    @UseGuards(AuthGuard)
+    me() {
+
     }
 
     @Mutation(returns => CreateAccountOutput)
