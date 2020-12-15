@@ -7,6 +7,7 @@ import { LoginDto, LoginOutput } from "./dto/login.dto";
 import { AuthGuard } from "../auth/auth.guard";
 import { AuthUser } from "../auth/auth-user.decorator";
 import { UserProfileDto, UserProfileOutput } from "./dto/user-profile.dto";
+import { EditProfileDto, EditProfileOutput } from "./dto/edit-profile.dto";
 
 @Resolver(of => User)
 export class UsersResolver {
@@ -57,6 +58,25 @@ export class UsersResolver {
     async login(@Args("input") loginDto: LoginDto): Promise<LoginOutput> {
         try {
             return await this.usersService.login(loginDto);
+        } catch (error) {
+            return {
+                ok: false,
+                error,
+            };
+        }
+    }
+
+    @Mutation(returns => EditProfileOutput)
+    @UseGuards(AuthGuard)
+    async editProfile(
+        @AuthUser() authUser: User,
+        @Args("input") editProfileDto: EditProfileDto,
+    ): Promise<EditProfileOutput> {
+        try {
+            await this.usersService.editProfile(authUser.id, editProfileDto);
+            return {
+                ok: true,
+            };
         } catch (error) {
             return {
                 ok: false,
