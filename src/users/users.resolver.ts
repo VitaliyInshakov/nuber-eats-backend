@@ -5,6 +5,7 @@ import { UsersService } from "./users.service";
 import { CreateAccountDto, CreateAccountOutput } from "./dto/create-account.dto";
 import { LoginDto, LoginOutput } from "./dto/login.dto";
 import { AuthGuard } from "../auth/auth.guard";
+import { AuthUser } from "../auth/auth-user.decorator";
 
 @Resolver(of => User)
 export class UsersResolver {
@@ -12,8 +13,8 @@ export class UsersResolver {
 
     @Query(returns => User)
     @UseGuards(AuthGuard)
-    me() {
-
+    me(@AuthUser() authUser: User) {
+        return authUser;
     }
 
     @Mutation(returns => CreateAccountOutput)
