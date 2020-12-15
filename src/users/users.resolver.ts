@@ -6,6 +6,7 @@ import { CreateAccountDto, CreateAccountOutput } from "./dto/create-account.dto"
 import { LoginDto, LoginOutput } from "./dto/login.dto";
 import { AuthGuard } from "../auth/auth.guard";
 import { AuthUser } from "../auth/auth-user.decorator";
+import { UserProfileDto, UserProfileOutput } from "./dto/user-profile.dto";
 
 @Resolver(of => User)
 export class UsersResolver {
@@ -15,6 +16,27 @@ export class UsersResolver {
     @UseGuards(AuthGuard)
     me(@AuthUser() authUser: User) {
         return authUser;
+    }
+
+    @Query(returns => UserProfileOutput)
+    @UseGuards(AuthGuard)
+    async userProfile(@Args() userProfileDto: UserProfileDto): Promise<UserProfileOutput> {
+        try {
+            const user = await this.usersService.findById(userProfileDto.userId);
+            if (!user) {
+                throw Error();
+            }
+
+            return {
+                ok: true,
+                user,
+            };
+        } catch (e) {
+            return {
+                ok: false,
+                error: "User not found",
+            };
+        }
     }
 
     @Mutation(returns => CreateAccountOutput)
