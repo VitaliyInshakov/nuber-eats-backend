@@ -2,17 +2,57 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type User {
+  id: Float!
+  createAt: DateTime!
+  updateAt: DateTime!
+  email: String!
+  password: String!
+  role: UserRole!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum UserRole {
+  Owner
+  Client
+  Delivery
+}
+
 type CreateAccountOutput {
   error: String
   ok: Boolean!
 }
 
+type LoginOutput {
+  error: String
+  ok: Boolean!
+  token: String
+}
+
+type UserProfileOutput {
+  error: String
+  ok: Boolean!
+  user: User
+}
+
+type EditProfileOutput {
+  error: String
+  ok: Boolean!
+}
+
 type Query {
-  hi: Boolean!
+  me: User!
+  userProfile(userId: Float!): UserProfileOutput!
 }
 
 type Mutation {
   createAccount(input: CreateAccountDto!): CreateAccountOutput!
+  login(input: LoginDto!): LoginOutput!
+  editProfile(input: EditProfileDto!): EditProfileOutput!
 }
 
 input CreateAccountDto {
@@ -21,8 +61,12 @@ input CreateAccountDto {
   role: UserRole!
 }
 
-enum UserRole {
-  Owner
-  Client
-  Delivery
+input LoginDto {
+  email: String!
+  password: String!
+}
+
+input EditProfileDto {
+  email: String
+  password: String
 }
