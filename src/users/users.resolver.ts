@@ -8,6 +8,7 @@ import { AuthGuard } from "../auth/auth.guard";
 import { AuthUser } from "../auth/auth-user.decorator";
 import { UserProfileDto, UserProfileOutput } from "./dto/user-profile.dto";
 import { EditProfileDto, EditProfileOutput } from "./dto/edit-profile.dto";
+import { VerifyEmailDto, VerifyEmailOutput } from "./dto/verify-email.dto";
 
 @Resolver(of => User)
 export class UsersResolver {
@@ -83,5 +84,10 @@ export class UsersResolver {
                 error,
             };
         }
+    }
+
+    @Mutation(returns => VerifyEmailOutput)
+    verifyEmail(@Args("input") verifyEmailDto: VerifyEmailDto) {
+
     }
 }
