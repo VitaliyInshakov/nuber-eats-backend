@@ -10,6 +10,7 @@ import { User } from "./users/entities/user.entity";
 import { JwtModule } from "./jwt/jwt.module";
 import { JwtMiddleware } from "./jwt/jwt.middleware";
 import { Verification } from "./users/entities/verification.entity";
+import { MailModule } from './mail/mail.module';
 
 @Module({
     imports: [
@@ -43,6 +44,11 @@ import { Verification } from "./users/entities/verification.entity";
         }),
         JwtModule.forRoot({
             privateKey:  process.env.TOKEN_SECRET,
+        }),
+        MailModule.forRoot({
+            apiKey: process.env.MAILGUN_API_KEY,
+            domain: process.env.MAILGUN_DOMAIN,
+            fromEmail: process.env.MAILGUN_FROM_EMAIL,
         }),
         UsersModule,
     ],
