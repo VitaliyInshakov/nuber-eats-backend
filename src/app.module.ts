@@ -18,7 +18,7 @@ import { MailModule } from './mail/mail.module';
             isGlobal: true,
             envFilePath: ".env",
             validationSchema: Joi.object({
-                NODE_ENV: Joi.string().valid("development", "production").required(),
+                NODE_ENV: Joi.string().valid("development", "production", "test").required(),
                 DB_HOST: Joi.string().required(),
                 DB_PORT: Joi.string().required(),
                 DB_USERNAME: Joi.string().required(),
@@ -39,7 +39,7 @@ import { MailModule } from './mail/mail.module';
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME,
             synchronize: process.env.NODE_ENV !== "production",
-            logging: true,
+            logging: process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "test",
             entities: [User, Verification],
         }),
         JwtModule.forRoot({
