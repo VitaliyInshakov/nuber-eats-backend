@@ -10,7 +10,7 @@ export class MailService {
     constructor(@Inject(CONFIG_OPTIONS) private readonly options: MailModuleOptions) {}
 
     // when get not free account on mailgun, add property 'to' instead of hardcode below
-    private async sendEmail(subject: string, template: string, emailVars: EmailVar[]) {
+    async sendEmail(subject: string, template: string, emailVars: EmailVar[]): Promise<boolean> {
         const form = new FormData();
         form.append("from", `From Nuber Eats <mailgun@${this.options.domain}>`);
         form.append("to", this.options.fromEmail);  // special for dev env, not for prod
@@ -20,16 +20,16 @@ export class MailService {
         emailVars.forEach(({ key, value }) => form.append(`v:${key}`, value));
 
         try {
-            const response = await got(`https://api.mailgun.net/v3/${this.options.domain}/messages`, {
+            await got.post(`https://api.mailgun.net/v3/${this.options.domain}/messages`, {
                 headers: {
                     "Authorization": `Basic ${Buffer.from(`api:${this.options.apiKey}`).toString("base64")}`,
                 },
-                method: "POST",
                 body: form,
             });
-            console.log(response.body)
+
+            return true;
         } catch (e) {
-            console.log(e);
+            return false;
         }
     }
 
