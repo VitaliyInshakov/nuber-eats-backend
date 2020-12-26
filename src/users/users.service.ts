@@ -132,12 +132,12 @@ export class UsersService {
 
            return {
                 ok: false,
-               error: "Verification not found",
+                error: "Verification not found",
            };
         } catch (error) {
             return {
                 ok: false,
-                error,
+                error: "Could not verify email",
             };
         }
     }
