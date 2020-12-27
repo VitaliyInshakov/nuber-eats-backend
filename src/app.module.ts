@@ -16,7 +16,7 @@ import { MailModule } from './mail/mail.module';
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            envFilePath: ".env",
+            envFilePath: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
             validationSchema: Joi.object({
                 NODE_ENV: Joi.string().valid("development", "production", "test").required(),
                 DB_HOST: Joi.string().required(),
