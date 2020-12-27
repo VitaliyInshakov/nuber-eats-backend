@@ -1,8 +1,10 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
+import { getRepositoryToken } from "@nestjs/typeorm";
 import * as request from "supertest";
-import { getConnection } from "typeorm";
+import { getConnection, Repository } from "typeorm";
 import { AppModule } from "../src/app.module";
+import { User } from "../src/users/entities/user.entity";
 
 jest.mock("got", () => {
     return {
@@ -10,7 +12,7 @@ jest.mock("got", () => {
     };
 });
 
-const GRAPHQL_ENDPONT = "/graphql";
+const GRAPHQL_ENDPOINT = "/graphql";
 const testUser = {
     email: "test_user@mail.com",
     password: "12345",
@@ -18,6 +20,7 @@ const testUser = {
 
 describe("UsersModule (e2e)", () => {
     let app: INestApplication;
+    let usersRepository: Repository<User>;
     let jwtToken: string;
 
     beforeAll(async () => {
@@ -26,6 +29,7 @@ describe("UsersModule (e2e)", () => {
         }).compile();
 
         app = module.createNestApplication();
+        usersRepository = module.get(getRepositoryToken(User));
         await app.init();
     });
 
@@ -37,7 +41,7 @@ describe("UsersModule (e2e)", () => {
     describe("createAccount", () => {
         it("should create account", () => {
             return request(app.getHttpServer())
-                .post(GRAPHQL_ENDPONT)
+                .post(GRAPHQL_ENDPOINT)
                 .send({
                     query: `
                     mutation {
@@ -61,7 +65,7 @@ describe("UsersModule (e2e)", () => {
 
         it("should fail if account already exists", () => {
             return request(app.getHttpServer())
-                .post(GRAPHQL_ENDPONT)
+                .post(GRAPHQL_ENDPOINT)
                 .send({
                     query: `
                     mutation {
@@ -87,7 +91,7 @@ describe("UsersModule (e2e)", () => {
     describe("login", () => {
         it("should login with correct credentials", () => {
             return request(app.getHttpServer())
-                .post(GRAPHQL_ENDPONT)
+                .post(GRAPHQL_ENDPOINT)
                 .send({
                     query: `
                     mutation {
@@ -114,7 +118,7 @@ describe("UsersModule (e2e)", () => {
 
         it("should not be able to login with wrong credentials", () => {
             return request(app.getHttpServer())
-                .post(GRAPHQL_ENDPONT)
+                .post(GRAPHQL_ENDPOINT)
                 .send({
                     query: `
                     mutation {
@@ -139,7 +143,67 @@ describe("UsersModule (e2e)", () => {
         });
     });
 
-    it.todo("userProfile");
+    describe("userProfile", () => {
+        let userId: number;
+
+        beforeAll(async () => {
+            const [user] = await usersRepository.find();
+            userId = user.id;
+        });
+
+        it("should see a user profile", () => {
+            return request(app.getHttpServer())
+                .post(GRAPHQL_ENDPOINT)
+                .set("X-JWT", jwtToken)
+                .send({
+                    query: `
+                    {
+                        userProfile(userId: ${userId}) {
+                            ok
+                            error
+                            user {
+                                id
+                            }
+                        }
+                    }
+                    `
+                })
+                .expect(200)
+                .expect(res => {
+                    const { body: { data: { userProfile: { ok, error, user: { id } } } } } = res;
+                    expect(ok).toBe(true);
+                    expect(error).toBe(null);
+                    expect(id).toBe(userId);
+                });
+        });
+
+        it("should not found a profile", () => {
+            return request(app.getHttpServer())
+                .post(GRAPHQL_ENDPOINT)
+                .set("X-JWT", jwtToken)
+                .send({
+                    query: `
+                    {
+                        userProfile(userId: 66) {
+                            ok
+                            error
+                            user {
+                                id
+                            }
+                        }
+                    }
+                    `
+                })
+                .expect(200)
+                .expect(res => {
+                    const { body: { data: { userProfile: { ok, error, user } } } } = res;
+                    expect(ok).toBe(false);
+                    expect(error).toBe("User not found");
+                    expect(user).toBe(null);
+                });
+        });
+    });
+
     it.todo("me");
     it.todo("editProfile");
     it.todo("verifyEmail");
