@@ -50,6 +50,25 @@ type VerifyEmailOutput {
   ok: Boolean!
 }
 
+type Category {
+  id: Float!
+  createAt: DateTime!
+  updateAt: DateTime!
+  name: String!
+  coverImage: String!
+  restaurants: [Restaurant!]!
+}
+
+type Restaurant {
+  id: Float!
+  createAt: DateTime!
+  updateAt: DateTime!
+  name: String!
+  coverImage: String!
+  address: String!
+  category: Category!
+}
+
 type Query {
   me: User!
   userProfile(userId: Float!): UserProfileOutput!
