@@ -11,6 +11,7 @@ import { DeleteRestaurantDto, DeleteRestaurantOutput } from "./dto/delete-restau
 import { Category } from "./entities/category.entity";
 import { AllCategoriesOutput } from "./dto/all-categories.dto";
 import { CategoryDto, CategoryOutput } from "./dto/category.dto";
+import { RestaurantsDto, RestaurantsOutput } from "./dto/restaurants.dto";
 
 @Resolver(of => Restaurant)
 export class RestaurantsResolver {
@@ -41,6 +42,11 @@ export class RestaurantsResolver {
         @Args("input") deleteRestaurantDto: DeleteRestaurantDto
     ): Promise<DeleteRestaurantOutput> {
         return await this.restaurantService.deleteRestaurant(authUser, deleteRestaurantDto);
+    }
+
+    @Query(returns => RestaurantsOutput)
+    restaurants(@Args("input") restaurantsDto: RestaurantsDto): Promise<RestaurantsOutput> {
+        return this.restaurantService.allRestaurants(restaurantsDto);
     }
 }
 
