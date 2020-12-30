@@ -1,16 +1,16 @@
-import { ArgsType, Field, ObjectType } from "@nestjs/graphql";
+import { Field, InputType, ObjectType } from "@nestjs/graphql";
 
-import { MutationOutput } from "src/common/dto/output.dto";
+import { PaginationDto, PaginationOutput } from "src/common/dto/pagination.dto";
 import { Category } from "../entities/category.entity";
 
-@ArgsType()
-export class CategoryDto {
+@InputType()
+export class CategoryDto extends PaginationDto {
     @Field(type => String)
     slug: string;
 }
 
 @ObjectType()
-export class CategoryOutput extends MutationOutput {
+export class CategoryOutput extends PaginationOutput {
     @Field(type => Category, { nullable: true })
     category?: Category;
 }

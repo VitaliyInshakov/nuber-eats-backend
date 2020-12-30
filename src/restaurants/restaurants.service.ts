@@ -137,12 +137,9 @@ export class RestaurantService {
         return this.restaurants.count({ category });
     }
 
-    async findCategoryBySlug({ slug }: CategoryDto): Promise<CategoryOutput> {
+    async findCategoryBySlug({ slug, page }: CategoryDto): Promise<CategoryOutput> {
         try {
-            const category = await this.categories.findOne(
-                { slug },
-                { relations: ["restaurants"] },
-            );
+            const category = await this.categories.findOne({ slug });
             if (!category) {
                 return {
                     ok: false,
@@ -150,9 +147,18 @@ export class RestaurantService {
                 };
             }
 
+            const restaurants = await this.restaurants.find({
+                where: { category },
+                take: 25,
+                skip: (page - 1) * 25,
+            });
+            category.restaurants = restaurants;
+            const total = await this.countRestaurants(category);
+
             return {
                 ok: true,
                 category,
+                totalPages: Math.ceil(total / 25),
             };
         } catch {
             return {
