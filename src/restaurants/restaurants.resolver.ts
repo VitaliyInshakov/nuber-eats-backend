@@ -10,6 +10,7 @@ import { EditRestaurantDto, EditRestaurantOutput } from "./dto/edit-restaurant.d
 import { DeleteRestaurantDto, DeleteRestaurantOutput } from "./dto/delete-restaurant.dto";
 import { Category } from "./entities/category.entity";
 import { AllCategoriesOutput } from "./dto/all-categories.dto";
+import { CategoryDto, CategoryOutput } from "./dto/category.dto";
 
 @Resolver(of => Restaurant)
 export class RestaurantsResolver {
@@ -47,13 +48,18 @@ export class RestaurantsResolver {
 export class CategoryResolver {
     constructor(private readonly restaurantService: RestaurantService) {}
 
-    @ResolveField(type => Int)
+    @ResolveField(returns => Int)
     restaurantCount(@Parent() category: Category): Promise<number> {
         return this.restaurantService.countRestaurants(category);
     }
 
-    @Query(type => AllCategoriesOutput)
+    @Query(returns => AllCategoriesOutput)
     allCategories(): Promise<AllCategoriesOutput> {
         return this.restaurantService.allCategories();
+    }
+
+    @Query(returns => CategoryOutput)
+    category(@Args() categoryDto: CategoryDto): Promise<CategoryOutput> {
+        return this.restaurantService.findCategoryBySlug(categoryDto);
     }
 }
