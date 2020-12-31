@@ -14,6 +14,7 @@ import { CategoryDto, CategoryOutput } from "./dto/category.dto";
 import { RestaurantsDto, RestaurantsOutput } from "./dto/restaurants.dto";
 import { RestaurantDto, RestaurantOutput } from "./dto/restaurant.dto";
 import { SearchRestaurantDto, SearchRestaurantOutput } from "./dto/search-restaurant.dto";
+import { CreateDishDto, CreateDishOutput } from "./dto/create-dish.dto";
 
 @Injectable()
 export class RestaurantService {
@@ -190,7 +191,7 @@ export class RestaurantService {
 
     async findRestaurantById({ restaurantId }: RestaurantDto): Promise<RestaurantOutput> {
         try {
-            const restaurant = await this.restaurants.findOne(restaurantId);
+            const restaurant = await this.restaurants.findOne(restaurantId, { relations: ["menu"] });
             if(!restaurant) {
                 return {
                     ok: false,
@@ -230,6 +231,26 @@ export class RestaurantService {
             return {
                 ok: false,
                 error: "Could not search restaurants",
+            };
+        }
+    }
+
+    async createDish(
+        owner: User,
+        createDishDto: CreateDishDto,
+    ): Promise<CreateDishOutput> {
+        try {
+            const restaurant = await this.restaurants.findOne(createDishDto.restaurantId);
+            if(!restaurant) {
+                return {
+                    ok: false,
+                    error: "Restaurant not found",
+                };
+            }
+        } catch {
+            return {
+                ok: false,
+                error: "Could not create dish",
             };
         }
     }
