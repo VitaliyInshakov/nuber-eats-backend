@@ -15,12 +15,15 @@ import { RestaurantsDto, RestaurantsOutput } from "./dto/restaurants.dto";
 import { RestaurantDto, RestaurantOutput } from "./dto/restaurant.dto";
 import { SearchRestaurantDto, SearchRestaurantOutput } from "./dto/search-restaurant.dto";
 import { CreateDishDto, CreateDishOutput } from "./dto/create-dish.dto";
+import { Dish } from "./entities/dish.entity";
 
 @Injectable()
 export class RestaurantService {
     constructor(
         @InjectRepository(Restaurant)
         private readonly restaurants: Repository<Restaurant>,
+        @InjectRepository(Dish)
+        private readonly dishes: Repository<Dish>,
         private readonly categories: CategoryRepository
     ) {}
 
@@ -247,6 +250,16 @@ export class RestaurantService {
                     error: "Restaurant not found",
                 };
             }
+
+            if (owner.id !== restaurant.ownerId) {
+                return {
+                    ok: false,
+                    error: "You can't do that",
+                }
+            }
+
+            const dish = await this.dishes.save(this.dishes.create({ ...createDishDto, restaurant }));
+
         } catch {
             return {
                 ok: false,
