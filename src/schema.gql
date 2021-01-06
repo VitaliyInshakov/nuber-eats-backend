@@ -41,12 +41,17 @@ type Dish {
   options: [DishOption!]
 }
 
+type OrderItemOption {
+  name: String!
+  choice: String
+}
+
 type OrderItem {
   id: Float!
   createAt: DateTime!
   updateAt: DateTime!
   dish: Dish!
-  options: [DishOption!]
+  options: [OrderItemOption!]
 }
 
 type Order {
@@ -317,5 +322,10 @@ input CreateOrderDto {
 
 input CreateOrderItemDto {
   dishId: Int!
-  options: DishOptionInputType
+  options: [OrderItemOptionInputType!]
+}
+
+input OrderItemOptionInputType {
+  name: String!
+  choice: String
 }
