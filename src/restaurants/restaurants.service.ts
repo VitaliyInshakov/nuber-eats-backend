@@ -22,11 +22,9 @@ import { DeleteDishDto, DeleteDishOutput } from "./dto/delete-dish.dto";
 @Injectable()
 export class RestaurantService {
     constructor(
-        @InjectRepository(Restaurant)
-        private readonly restaurants: Repository<Restaurant>,
-        @InjectRepository(Dish)
-        private readonly dishes: Repository<Dish>,
-        private readonly categories: CategoryRepository
+        @InjectRepository(Restaurant) private readonly restaurants: Repository<Restaurant>,
+        @InjectRepository(Dish) private readonly dishes: Repository<Dish>,
+        private readonly categories: CategoryRepository,
     ) {}
 
     async createRestaurant(
