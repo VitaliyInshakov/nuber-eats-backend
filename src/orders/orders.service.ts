@@ -2,12 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
-import { User } from "src/users/entities/user.entity";
+import { User, UserRole } from "src/users/entities/user.entity";
 import { Restaurant } from "src/restaurants/entities/restaurants.entity";
 import { Dish } from "src/restaurants/entities/dish.entity";
 import { Order } from "./entities/order.entity";
 import { CreateOrderDto, CreateOrderOutput } from "./dto/create-order.dto";
 import { OrderItem } from "./entities/order-item.entity";
+import { GetOrdersDto, GetOrdersOutput } from "./dto/get-orders.dto";
+import { GetOrderDto, GetOrderOutput } from "./dto/get-order.dto";
 
 @Injectable()
 export class OrdersService {
@@ -24,7 +26,7 @@ export class OrdersService {
     ): Promise<CreateOrderOutput> {
         try {
             const restaurant = await this.restaurants.findOne(restaurantId);
-            if(!restaurant) {
+            if (!restaurant) {
                 return {
                     ok: false,
                     error: "Restaurant not found",
@@ -33,7 +35,7 @@ export class OrdersService {
 
             let orderFinalPrice = 0;
             const orderItems: OrderItem[] = [];
-            for(const item of items) {
+            for (const item of items) {
                 const dish = await this.dishes.findOne(item.dishId);
                 if(!dish) {
                     return {
@@ -81,6 +83,94 @@ export class OrdersService {
             return {
                 ok: false,
                 error: "Could not create order",
+            };
+        }
+    }
+
+    async getOrders(
+        user: User,
+        { status }: GetOrdersDto,
+    ): Promise<GetOrdersOutput> {
+        try {
+            let orders: Order[];
+            if (user.role === UserRole.Client) {
+                orders = await this.orders.find({
+                    where: {
+                        customer: user,
+                        ...(status && { status }),
+                    },
+                });
+            } else if (user.role === UserRole.Delivery) {
+                orders = await this.orders.find({
+                    where: {
+                        driver: user,
+                        ...(status && { status }),
+                    },
+                });
+            } else if (user.role === UserRole.Owner) {
+                const restaurants = await this.restaurants.find({
+                    where: {
+                        owner: user,
+                    },
+                    relations: ["orders"],
+                });
+                orders = restaurants.map(({ orders }) => orders).flat();
+                if (status) {
+                    orders = orders.filter(({ status: orderStatus }) => orderStatus === status);
+                }
+            }
+            return {
+                ok: true,
+                orders,
+            };
+        } catch {
+            return {
+                ok: false,
+                error: "Could not get orders",
+            };
+        }
+    }
+
+    async getOrder(
+        user: User,
+        { id: orderId }: GetOrderDto,
+    ): Promise<GetOrderOutput> {
+        try {
+            const order = await this.orders.findOne(orderId, {
+                relations: ["restaurants"],
+            });
+            if (!order) {
+                return {
+                    ok: false,
+                    error: "Order not found",
+                };
+            }
+
+            let canSee = true;
+            if (user.role === UserRole.Client && order.customerId !== user.id) {
+                canSee = false;
+            }
+            if (user.role === UserRole.Delivery && order.driverId !== user.id) {
+                canSee = false;
+            }
+            if (user.role === UserRole.Owner && order.restaurant.ownerId !== user.id) {
+                canSee = false;
+            }
+            if (!canSee) {
+                return {
+                    ok: false,
+                    error: "You can't see that",
+                };
+            }
+
+            return {
+                ok: true,
+                order,
+            };
+        } catch {
+            return {
+                ok: false,
+                error: "Could not get order",
             };
         }
     }

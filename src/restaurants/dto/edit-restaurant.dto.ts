@@ -1,6 +1,6 @@
 import { Field, InputType, ObjectType, PartialType } from "@nestjs/graphql";
 
-import { MutationOutput } from "src/common/dto/output.dto";
+import { CoreOutput } from "src/common/dto/output.dto";
 import { CreateRestaurantDto } from "./create-restaurant.dto";
 
 @InputType()
@@ -10,4 +10,4 @@ export class EditRestaurantDto extends PartialType(CreateRestaurantDto) {
 }
 
 @ObjectType()
-export class EditRestaurantOutput extends MutationOutput {}
+export class EditRestaurantOutput extends CoreOutput {}

@@ -1,6 +1,6 @@
 import { Field, InputType, Int, ObjectType } from "@nestjs/graphql";
 
-import { MutationOutput } from "src/common/dto/output.dto";
+import { CoreOutput } from "src/common/dto/output.dto";
 
 @InputType()
 export class DeleteDishDto {
@@ -9,4 +9,4 @@ export class DeleteDishDto {
 }
 
 @ObjectType()
-export class DeleteDishOutput extends MutationOutput {}
+export class DeleteDishOutput extends CoreOutput {}
