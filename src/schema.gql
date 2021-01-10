@@ -69,6 +69,7 @@ type Order {
 enum OrderStatus {
   Pending
   Cooking
+  Cooked
   PickedUp
   Delivered
 }
@@ -203,6 +204,23 @@ type CreateOrderOutput {
   ok: Boolean!
 }
 
+type GetOrdersOutput {
+  error: String
+  ok: Boolean!
+  orders: [Order!]
+}
+
+type GetOrderOutput {
+  error: String
+  ok: Boolean!
+  order: Order
+}
+
+type EditOrderOutput {
+  error: String
+  ok: Boolean!
+}
+
 type Query {
   me: User!
   userProfile(userId: Float!): UserProfileOutput!
@@ -211,6 +229,8 @@ type Query {
   searchRestaurant(input: SearchRestaurantDto!): SearchRestaurantOutput!
   allCategories: AllCategoriesOutput!
   category(input: CategoryDto!): CategoryOutput!
+  getOrders(input: GetOrdersDto!): GetOrdersOutput!
+  getOrder(input: GetOrderDto!): GetOrderOutput!
 }
 
 input RestaurantsDto {
@@ -231,6 +251,14 @@ input CategoryDto {
   slug: String!
 }
 
+input GetOrdersDto {
+  status: OrderStatus
+}
+
+input GetOrderDto {
+  id: Float!
+}
+
 type Mutation {
   createAccount(input: CreateAccountDto!): CreateAccountOutput!
   login(input: LoginDto!): LoginOutput!
@@ -243,6 +271,7 @@ type Mutation {
   editDish(input: EditDishDto!): EditDishOutput!
   deleteDish(input: DeleteDishDto!): DeleteDishOutput!
   createOrder(input: CreateOrderDto!): CreateOrderOutput!
+  editOrder(input: EditOrderDto!): EditOrderOutput!
 }
 
 input CreateAccountDto {
@@ -328,4 +357,13 @@ input CreateOrderItemDto {
 input OrderItemOptionInputType {
   name: String!
   choice: String
+}
+
+input EditOrderDto {
+  id: Float!
+  status: OrderStatus!
+}
+
+type Subscription {
+  orderSubscription: String!
 }
