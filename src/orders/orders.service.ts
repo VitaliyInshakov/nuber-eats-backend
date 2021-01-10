@@ -6,7 +6,7 @@ import { PubSub } from "graphql-subscriptions";
 import { User, UserRole } from "src/users/entities/user.entity";
 import { Restaurant } from "src/restaurants/entities/restaurants.entity";
 import { Dish } from "src/restaurants/entities/dish.entity";
-import { NEW_PENDING_ORDER, PUB_SUB } from "src/common/common.constants";
+import { NEW_COOKED_ORDER, NEW_PENDING_ORDER, PUB_SUB } from "src/common/common.constants";
 import { Order, OrderStatus } from "./entities/order.entity";
 import { CreateOrderDto, CreateOrderOutput } from "./dto/create-order.dto";
 import { OrderItem } from "./entities/order-item.entity";
@@ -240,6 +240,14 @@ export class OrdersService {
                 id: orderId,
                 status,
             }]);
+
+            if (user.role === UserRole.Owner) {
+                if (status === OrderStatus.Cooked) {
+                    await this.pubSub.publish(NEW_COOKED_ORDER, {
+                        cookedOrders: { ...order, status },
+                    });
+                }
+            }
 
             return {
                 ok: true,
