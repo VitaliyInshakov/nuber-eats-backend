@@ -13,6 +13,7 @@ import { OrderItem } from "./entities/order-item.entity";
 import { GetOrdersDto, GetOrdersOutput } from "./dto/get-orders.dto";
 import { GetOrderDto, GetOrderOutput } from "./dto/get-order.dto";
 import { EditOrderDto } from "./dto/edit-order.dto";
+import { TakeOrderDto, TakeOrderOutput } from "./dto/take-order.dto";
 
 @Injectable()
 export class OrdersService {
@@ -260,6 +261,46 @@ export class OrdersService {
             return {
                 ok: false,
                 error: "Could not edit Order",
+            };
+        }
+    }
+
+    async takeOrder(driver: User, { id: orderId }: TakeOrderDto): Promise<TakeOrderOutput> {
+        try {
+            const order = await this.orders.findOne(orderId, {
+                relations: ["restaurants"],
+            });
+
+            if (!order) {
+                return {
+                    ok: false,
+                    error: "Order not found",
+                };
+            }
+
+            if (!order.driver) {
+                return {
+                    ok: false,
+                    error: "This order already has a driver",
+                };
+            }
+
+            await this.orders.save({
+                id: orderId,
+                driver,
+            });
+
+            await this.pubSub.publish(NEW_ORDER_UPDATE, {
+                orderUpdates: { ...order, driver },
+            });
+
+            return {
+                ok: true,
+            };
+        } catch (err) {
+            return {
+                ok: false,
+                error: "Could not update Order",
             };
         }
     }

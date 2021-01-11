@@ -13,6 +13,7 @@ import { GetOrdersDto, GetOrdersOutput } from "./dto/get-orders.dto";
 import { GetOrderDto, GetOrderOutput } from "./dto/get-order.dto";
 import { EditOrderDto, EditOrderOutput } from "./dto/edit-order.dto";
 import { OrderUpdatesDto } from "./dto/order-updates.dto";
+import { TakeOrderDto, TakeOrderOutput } from "./dto/take-order.dto";
 
 @Resolver(of => Order)
 export class OrdersResolver {
@@ -89,5 +90,14 @@ export class OrdersResolver {
     @Role(["Any"])
     orderUpdates(@Args("input") orderUpdatesDto: OrderUpdatesDto) {
         return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
+    }
+
+    @Mutation(returns => TakeOrderOutput)
+    @Role(["Delivery"])
+    takeOrder(
+        @AuthUser() driver: User,
+        @Args("input") takeOrderDto: TakeOrderDto,
+    ): Promise<TakeOrderOutput> {
+        return this.ordersService.takeOrder(driver, takeOrderDto);
     }
 }
