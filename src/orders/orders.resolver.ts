@@ -5,13 +5,14 @@ import { PubSub } from "graphql-subscriptions";
 import { AuthUser } from "src/auth/auth-user.decorator";
 import { User } from "src/users/entities/user.entity";
 import { Role } from "src/auth/role.decorator";
-import { NEW_COOKED_ORDER, NEW_PENDING_ORDER, PUB_SUB } from "src/common/common.constants";
+import { NEW_COOKED_ORDER, NEW_ORDER_UPDATE, NEW_PENDING_ORDER, PUB_SUB } from "src/common/common.constants";
 import { Order } from "./entities/order.entity";
 import { OrdersService } from "./orders.service";
 import { CreateOrderDto, CreateOrderOutput } from "./dto/create-order.dto";
 import { GetOrdersDto, GetOrdersOutput } from "./dto/get-orders.dto";
 import { GetOrderDto, GetOrderOutput } from "./dto/get-order.dto";
 import { EditOrderDto, EditOrderOutput } from "./dto/edit-order.dto";
+import { OrderUpdatesDto } from "./dto/order-updates.dto";
 
 @Resolver(of => Order)
 export class OrdersResolver {
@@ -71,5 +72,22 @@ export class OrdersResolver {
     @Role(["Delivery"])
     cookedOrders() {
         return this.pubSub.asyncIterator(NEW_COOKED_ORDER);
+    }
+
+    @Subscription(returns => Order, {
+        filter: ({ orderUpdates }, { input: { id } }, { user }) => {
+            if (
+                orderUpdates.driverId !== user.id
+                && orderUpdates.customerId !== user.id
+                && orderUpdates.restaurant.ownerId !== user.id
+            ) {
+                return false;
+            }
+            return orderUpdates.id === id;
+        },
+    })
+    @Role(["Any"])
+    orderUpdates(@Args("input") orderUpdatesDto: OrderUpdatesDto) {
+        return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
     }
 }
