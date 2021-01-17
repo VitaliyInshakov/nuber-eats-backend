@@ -7,6 +7,7 @@ import { IsBoolean, IsEnum, IsString } from "class-validator";
 import { CoreEntity } from "src/common/entitites/core.entity";
 import { Restaurant } from "src/restaurants/entities/restaurants.entity";
 import { Order } from "src/orders/entities/order.entity";
+import { Payment } from "src/payments/entities/payment.entity";
 
 export enum UserRole {
     Owner = "Owner",
@@ -50,6 +51,10 @@ export class User extends CoreEntity {
     @Field(type => [Order])
     @OneToMany(type => Order, order => order.driver)
     rides: Order[];
+
+    @Field(type => [Payment])
+    @OneToMany(type => Payment, payment => payment.user)
+    payments: Payment[];
 
     @BeforeInsert()
     @BeforeUpdate()
