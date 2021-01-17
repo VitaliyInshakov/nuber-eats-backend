@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { GraphQLModule } from "@nestjs/graphql";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
 import * as Joi from "joi";
 import { join } from "path";
 
@@ -65,6 +66,7 @@ import { Payment } from "./payments/entities/payment.entity";
                 Payment,
             ],
         }),
+        ScheduleModule.forRoot(),
         JwtModule.forRoot({
             privateKey:  process.env.TOKEN_SECRET,
         }),
