@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Cron, SchedulerRegistry } from "@nestjs/schedule";
+import { LessThan, Repository } from "typeorm";
+import { Interval } from "@nestjs/schedule";
 
 import { User } from "src/users/entities/user.entity";
 import { Restaurant } from "src/restaurants/entities/restaurants.entity";
@@ -14,7 +14,6 @@ export class PaymentService {
     constructor(
         @InjectRepository(Payment) private readonly payments: Repository<Payment>,
         @InjectRepository(Restaurant) private readonly restaurants: Repository<Restaurant>,
-        private schedulerRegistry: SchedulerRegistry,
     ) {}
 
     async createPayment(
@@ -35,6 +34,12 @@ export class PaymentService {
                     error: "You can't do that",
                 };
             }
+
+            restaurant.isPromoted = true;
+            const date = new Date();
+            date.setDate(date.getDate() + 7);
+            restaurant.promotedUntil = date;
+            await this.restaurants.save(restaurant);
 
             await this.payments.save(this.payments.create({
                 transactionId,
@@ -68,12 +73,17 @@ export class PaymentService {
         }
     }
 
-    @Cron("30 * * * * *", {
-        name: "myJob",
-    })
-    async checkForPayments() {
-        console.log("Checking for payments");
-        const job = this.schedulerRegistry.getCronJob("myJob");
-        job.stop();
+    @Interval(2000)
+    async checkPromotedRestaurants() {
+        const restaurants = await this.restaurants.find({
+            isPromoted: true,
+            promotedUntil: LessThan(new Date()),
+        });
+
+        for (const restaurant of restaurants) {
+            restaurant.isPromoted = false;
+            restaurant.promotedUntil = null;
+            await this.restaurants.save(restaurant);
+        }
     }
 }
